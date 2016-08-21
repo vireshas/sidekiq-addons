@@ -4,22 +4,24 @@ require "sidekiq/fetch"
 module Sidekiq::Addons::Prioritize
   class Deqr < Sidekiq::BasicFetch
 
-    ZPOP = %q(
-      local resp = redis.call('zrevrange', KEYS[1], '0', '0')
-      if (resp[1] ~= nil) then
-        local val = resp[# resp]
-        redis.call('zrem', KEYS[1], val)
-        return val
-      else
-        return false
+    attr_accessor :script_sha
+
+    def zpop(queue)
+      Sidekiq.redis do |con|
+        #TODO: for some reason pipeline and multi didnt work; revisit
+        if ( self.script_sha.nil? ) or !con.script(:exists, self.script_sha)
+          self.script_sha = con.script(:load, Sidekiq::Addons::Util::ZPOP)
+        end
+
+        con.evalsha(self.script_sha, [queue])
       end
-    )
+    end
 
     def retrieve_work
       priority_job = nil
       @queues.uniq.each do |q|
         q_name = Sidekiq::Addons::Util.priority_job_queue_name(q.split("queue:").last)
-        priority_job = Sidekiq.redis {|con| con.eval(Deqr::ZPOP, [q_name]) }
+        priority_job = zpop(q_name)
         break unless priority_job.nil?
       end
 

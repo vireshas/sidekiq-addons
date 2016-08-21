@@ -30,5 +30,6 @@ module Sidekiq
         config.redis = Sidekiq.options[:redis_url]
       end
     end
+
   end
 end
