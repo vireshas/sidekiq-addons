@@ -1,19 +1,35 @@
 module Sidekiq::Addons::Prioritize
   class Enqr
 
-    def call(worker_class, msg, queue, redis_pool)
-      to_ignore_qs = Sidekiq.options[:ignore_prioritize] || []
+    def compute_priority(queue, msg)
+      to_ignore_qs = Sidekiq.options[:ignore_priority] || []
+      min_priority = msg["min_priority"] || Sidekiq.options[:min_priority] || 0
+      ignore_priority = msg["ignore_priority"]
+      lazy_eval = msg["lazy_eval"]
 
-      priority = 0
-      unless to_ignore_qs.include? queue
+      priority = min_priority
+      if ignore_priority or (to_ignore_qs.include?(queue))
+        priority = 0
+
+      elsif lazy_eval
+        priority = lazy_eval.call(msg["args"])
+        unless priority.is_a?(Integer)
+          priority = priority ? (min_priority + 1) : (min_priority - 1)
+        end
+
+      else
         priority = self.class.get_priority_from_msg(msg)
       end
 
-      if ( priority > 0 )
+      return (priority > min_priority) ? priority : nil
+    end
+
+    def call(worker_class, msg, queue, redis_pool)
+      priority = compute_priority(queue, msg)
+      if priority
         msg["queue"] = "queue:#{queue}"
-        redis_pool.with do |con|
-          self.class.enqueue_with_priority(con, queue, priority, msg)
-        end
+        msg["queue"] = "queue:#{queue}"
+        redis_pool.with {|con| self.class.enqueue_with_priority(con, queue, priority, msg) }
         return false
       else
         yield

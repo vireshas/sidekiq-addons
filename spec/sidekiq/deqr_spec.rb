@@ -21,33 +21,41 @@ module Sidekiq::Addons::Prioritize
       expect(job).to eq nil
     end
 
-    it 'should add enqueue job which has with_priority' do
-      jid = MockWorker.perform_async(1, {:with_priority => 100})
-      expect(jid).to eq nil
+    it 'should prioritize job with higher priority' do
+      MockWorker.perform_async(1, {:with_priority => 90})
+      MockWorker.perform_async(2, {:with_priority => 90})
+      MockWorker.perform_async(3, {:with_priority => 90})
+      MockWorker.perform_async(4, {:with_priority => 100})
 
-      jid = MockWorker.perform_async(2, {:with_priority => 90})
-      expect(jid).to eq nil
+      d = Deqr.new(queues: ['default'])
+      job = d.retrieve_work.message
+      f_job = JSON.parse(job)
 
-      jid = MockWorker.perform_async(3, {:with_priority => 90})
-      expect(jid).to eq nil
+      expect(f_job["args"].first).to eq 4
+      expect(f_job["class"]).to eq "MockWorker"
+    end
 
-      jid = MockWorker.perform_async(4, {:with_priority => 100})
-      expect(jid).to eq nil
+    it 'should prioritize job with higher priority' do
+      MockWorker.perform_async(11, {:with_priority => 90})
+      MockWorker.perform_async(12, {:with_priority => 90})
+      MockWorker.perform_async(14, {:with_priority => 100})
 
-      expected_q = 'sidekiq-addons:pq:default'
-      job = Sidekiq.redis {|c| c.keys(expected_q) }
-      expect(job.size).to eq 1
-      expect(job.first).to eq expected_q
+      IgnoreWorker.perform_async(21, {:with_priority => 90})
+      IgnoreWorker.perform_async(22, {:with_priority => 90})
+      IgnoreWorker.perform_async(24, {:with_priority => 100})
 
-      jobs = Sidekiq.redis {|c| c.zrevrange(expected_q, 0, -1) }
-      expect(jobs.size).to eq 4
+      d = Deqr.new(queues: ['default'])
+      job = d.retrieve_work.message
+      f_job = JSON.parse(job)
+      expect(f_job["args"].first).to eq 14
+      expect(f_job["class"]).to eq "MockWorker"
 
-      expectation = { "0" => 1, "1" => 4, "2" => 2, "3" => 3}
-
-      jobs.each_with_index do |job, i|
-        expect(JSON.parse(job)["class"]).to eq "MockWorker"
-        expect(expectation.values.include?(JSON.parse(job)["args"].first.to_i)).to eq true
-      end
+      2.times {
+        d = Deqr.new(queues: ['default'])
+        job = d.retrieve_work.message
+        f_job = JSON.parse(job)
+        expect(f_job["class"]).to eq "MockWorker"
+      }
     end
   end
 end

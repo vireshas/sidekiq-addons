@@ -22,7 +22,7 @@ module Sidekiq::Addons::Prioritize
       @queues.uniq.each do |q|
         q_name = Sidekiq::Addons::Util.priority_job_queue_name(q.split("queue:").last)
         priority_job = zpop(q_name)
-        break unless priority_job.nil?
+        break if priority_job
       end
 
       if priority_job.nil?
