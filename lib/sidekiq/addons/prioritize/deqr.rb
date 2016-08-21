@@ -16,19 +16,17 @@ module Sidekiq::Addons::Prioritize
     )
 
     def retrieve_work
-      if "queue:asset_processor".in? @queues.uniq
-        priority_job = Sidekiq.redis {|con| con.eval(Deqr::ZPOP, ["priority_queue"]) }
-      else
-        priority_job = nil
+      priority_job = nil
+      @queues.uniq.each do |q|
+        q_name = Sidekiq::Addons::Util.priority_job_queue_name(q.split("queue:").last)
+        priority_job = Sidekiq.redis {|con| con.eval(Deqr::ZPOP, [q_name]) }
+        break unless priority_job.nil?
       end
 
       if priority_job.nil?
         return super
       else
         work = JSON.load(priority_job)
-        Sidekiq.redis do |con|
-          Sidekiq::ClientMiddleware.stat_dequeued(con, work)
-        end
         return UnitOfWork.new(work["queue"], priority_job)
       end
     end
@@ -39,10 +37,10 @@ module Sidekiq::Addons::Prioritize
       jobs_unhandled = []
       inprogress.each do |unit_work|
         unit_work = JSON.load(unit_work)
-        priority = Sidekiq::ClientMiddleware.priority_from_unit_work(unit_work)
-        if priority
+        priority = Sidekiq::Addons::Prioritize::Enqr.get_priority_from_msg(unit_work)
+        if ( priority > 0 )
           Sidekiq.redis do |con|
-            Sidekiq::ClientMiddleware.enqueue_with_priority(con, priority, unit_work)
+            Sidekiq::Addons::Prioritize::Enqr.enqueue_with_priority(con, unit_work["queue"], priority, unit_work)
           end
         else
           jobs_unhandled << unit_work.to_json

@@ -1,11 +1,6 @@
-require "byebug"
-
 module Sidekiq::Addons::Prioritize
   class Enqr
 
-    #pass 'with_priority' to bypass regular queue
-    #and stop the client middleware
-    #else default to original implementation
     def call(worker_class, msg, queue, redis_pool)
       to_ignore_qs = Sidekiq.options[:ignore_prioritize] || []
 
@@ -26,6 +21,7 @@ module Sidekiq::Addons::Prioritize
     end
 
     class << self
+
       def get_priority_from_msg(msg)
         priority = nil
 
@@ -45,8 +41,10 @@ module Sidekiq::Addons::Prioritize
       end
 
       def enqueue_with_priority(con, queue, priority, msg)
-        return con.zadd("sidekiq-addons:pq:#{queue}", priority, msg.to_json)
+        q_name = Sidekiq::Addons::Util.priority_job_queue_name(queue)
+        return con.zadd(q_name, priority, msg.to_json)
       end
+
     end
 
   end

@@ -1,4 +1,6 @@
+require "byebug"
 require "sidekiq"
+require "sidekiq/addons/util"
 require "sidekiq/addons/version"
 require "sidekiq/addons/prioritize/enqr"
 require "sidekiq/addons/prioritize/deqr"
