@@ -2,7 +2,7 @@
 
   * Dynamically change job priority with in the same queue.  
  
-## Overview:
+## Overview
   
 Enqueue job with default priority
 ```ruby
@@ -56,7 +56,7 @@ end
 Proc should either return a number or true to use priority scheduling
 
 
-## Benefits:  
+## Benefits  
   * Doesnt interrupt those jobs that are already getting executed, but, makes sure that the next job that will be executed will be a highest priority job.   
   * Minimal code changes: You just have to pass an extra param when you enqueue a job and jobs will be scheduled based on this param value.
   * Minimal network transfer: loads a script in Redis and uses SHA to execute it. This greatly reduces network data transfer.
@@ -64,7 +64,7 @@ Proc should either return a number or true to use priority scheduling
   * When Sidekiq is interruppted, active jobs are re-enqueued with the existing priority. When Sidekiq boots-up, it will still pick the highest prortized job.
   * Has automic ZPOP
 
-## Coming up:
+## Coming up
   * Uniqueness: removes duplicate jobs
   * Cron(?)
   * Stats
@@ -102,4 +102,3 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/viresh
 ## License
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
-
