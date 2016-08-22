@@ -16,9 +16,10 @@ module Sidekiq::Addons::Prioritize
         unless priority.is_a?(Integer)
           priority = priority ? (min_priority + 1) : (min_priority - 1)
         end
-
+        msg.delete("lazy_eval")
       else
         priority = self.class.get_priority_from_msg(msg)
+
       end
 
       return (priority > min_priority) ? priority : nil
@@ -27,7 +28,6 @@ module Sidekiq::Addons::Prioritize
     def call(worker_class, msg, queue, redis_pool)
       priority = compute_priority(queue, msg)
       if priority
-        msg["queue"] = "queue:#{queue}"
         msg["queue"] = "queue:#{queue}"
         redis_pool.with {|con| self.class.enqueue_with_priority(con, queue, priority, msg) }
         return false
