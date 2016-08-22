@@ -2,7 +2,7 @@
 
   * Dynamically change job priority with in the same queue.  
  
-# Overview:
+## Overview:
   
 Enqueue job with default priority
 ```ruby
@@ -16,38 +16,6 @@ Enqueue job with a priority
  job4 = MockWorker.perform_async(1, {:with_priority => 70})
 ```
 When jobs are enqueued in this order, this gems makes sure that, job3 is the one that will be executed next(as it has the highest priority), this will be followed by job2, job1 and job4.
-
-#Benefits:  
-  * Doesnt interrupt those jobs that are already getting executed, but, makes sure that the next job that will be executed will be a highest priority job.   
-  * Minimal code changes: You just have to pass an extra param when you enqueue a job and jobs will be scheduled based on this param value.
-  * Minimal network transfer: loads a script in Redis and uses SHA to execute it. This greatly reduces network data transfer.
-  * Can talk to remote Redis: From your stack, you can pass a REDIS_URL in Sidekiq.options and it cant talk to that Redis.
-  * When Sidekiq is interruppted, active jobs are re-enqueued with the existing priority. When Sidekiq boots-up, it will still pick the highest prortized job.
-  * Has automic ZPOP
-
-#Coming up:
-  * Uniqueness: removes duplicate jobs
-  * Cron(?)
-  * Stats
-  * Monitor
-  * Sidekiq-UI: integrate with sidekiq-UI
-  * 
-
-## Installation
-
-Add this line to your application's Gemfile:
-
-```ruby
-gem 'sidekiq-addons'
-```
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install sidekiq-addons
 
 ## Usage
 
@@ -86,6 +54,40 @@ class LazyEvalWorker
 end
 ```
 Proc should either return a number or true to use priority scheduling
+
+
+## Benefits:  
+  * Doesnt interrupt those jobs that are already getting executed, but, makes sure that the next job that will be executed will be a highest priority job.   
+  * Minimal code changes: You just have to pass an extra param when you enqueue a job and jobs will be scheduled based on this param value.
+  * Minimal network transfer: loads a script in Redis and uses SHA to execute it. This greatly reduces network data transfer.
+  * Can talk to remote Redis: From your stack, you can pass a REDIS_URL in Sidekiq.options and it cant talk to that Redis.
+  * When Sidekiq is interruppted, active jobs are re-enqueued with the existing priority. When Sidekiq boots-up, it will still pick the highest prortized job.
+  * Has automic ZPOP
+
+## Coming up:
+  * Uniqueness: removes duplicate jobs
+  * Cron(?)
+  * Stats
+  * Monitor
+  * Sidekiq-UI: integrate with sidekiq-UI
+  * 
+
+## Installation
+
+Add this line to your application's Gemfile:
+
+```ruby
+gem 'sidekiq-addons'
+```
+
+And then execute:
+
+    $ bundle
+
+Or install it yourself as:
+
+    $ gem install sidekiq-addons
+
 
 ## Development
 
