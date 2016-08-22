@@ -1,6 +1,6 @@
 # Sidekiq::Addons
 
-  * Priority jobs: Job priority with in the same queue.  
+  * Dynamically change job priority with in the same queue.  
  
 # Overview:
   
@@ -13,8 +13,9 @@ Enqueue job with a priority
  job1 = MockWorker.perform_async(1, {:with_priority => 80})
  job2 = MockWorker.perform_async(1, {:with_priority => 90})
  job3 = MockWorker.perform_async(1, {:with_priority => 100})
+ job4 = MockWorker.perform_async(1, {:with_priority => 70})
 ```
-When jobs are enqueued in this order, this gems makes sure that, job3 is the one that will be executed next(as it has the highest priority), this will be followed by job2 and then job1.
+When jobs are enqueued in this order, this gems makes sure that, job3 is the one that will be executed next(as it has the highest priority), this will be followed by job2, job1 and job4.
 
 #Benefits:  
   * Doesnt interrupt those jobs that are already getting executed, but, makes sure that the next job that will be executed will be a highest priority job.   
@@ -22,6 +23,7 @@ When jobs are enqueued in this order, this gems makes sure that, job3 is the one
   * Minimal network transfer: loads a script in Redis and uses SHA to execute it. This greatly reduces network data transfer.
   * Can talk to remote Redis: From your stack, you can pass a REDIS_URL in Sidekiq.options and it cant talk to that Redis.
   * When Sidekiq is interruppted, active jobs are re-enqueued with the existing priority. When Sidekiq boots-up, it will still pick the highest prortized job.
+  * Has automic ZPOP
 
 #Coming up:
   * Uniqueness: removes duplicate jobs
@@ -49,6 +51,7 @@ Or install it yourself as:
 
 ## Usage
 
+To always use default priority set ignore_priority => true at worker level
 ```ruby
 class IgnoreWorker
   include Sidekiq::Worker
@@ -57,15 +60,10 @@ class IgnoreWorker
   def perform(arg)
   end
 end
+```
 
-class NonDefaultWorker
-  include Sidekiq::Worker
-  sidekiq_options :queue => :non_default
-
-  def perform(arg)
-  end
-end
-
+Moves job to priority queue when with_priority or blocks value is greater than min_priority
+```ruby
 class MinPriorityWorker
   include Sidekiq::Worker
   sidekiq_options :min_priority => 50
@@ -73,7 +71,10 @@ class MinPriorityWorker
   def perform(arg)
   end
 end
+```
 
+Use a block to assign priority dynamically
+```ruby
 class LazyEvalWorker
   include Sidekiq::Worker
   sidekiq_options :lazy_eval => Proc.new { |param|
@@ -84,6 +85,7 @@ class LazyEvalWorker
   end
 end
 ```
+Proc should either return a number or true to use priority scheduling
 
 ## Development
 
