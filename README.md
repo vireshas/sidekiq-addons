@@ -1,5 +1,7 @@
 # Sidekiq::Addons
 
+[![Join the chat at https://gitter.im/vireshas/sidekiq-addons](https://badges.gitter.im/vireshas/sidekiq-addons.svg)](https://gitter.im/vireshas/sidekiq-addons?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
   * Dynamically change job priority with in the same queue.  
  
 ## Overview
