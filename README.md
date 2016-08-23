@@ -19,8 +19,6 @@ Enqueue job with a priority
 ```
 When jobs are enqueued in this order, this gems makes sure that, job3 is the one that will be executed next(as it has the highest priority), this will be followed by job2, job1 and job4.
 
-#### Discussions: https://gitter.im/vireshas/sidekiq-addons
-
 ## Usage
 
 To always use default priority set ignore_priority => true at worker level
