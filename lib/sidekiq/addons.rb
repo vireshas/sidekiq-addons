@@ -1,4 +1,3 @@
-require "byebug"
 require "sidekiq"
 require "sidekiq/addons/util"
 require "sidekiq/addons/version"
