@@ -42,10 +42,10 @@ PLATFORMS
 
 DEPENDENCIES
   bundler (~> 1.12)
-  byebug
+  byebug (~> 6.0)
   rake (~> 10.0)
   rspec (~> 3.0)
-  sidekiq
+  sidekiq (~> 3.2)
   sidekiq-addons!
 
 BUNDLED WITH
