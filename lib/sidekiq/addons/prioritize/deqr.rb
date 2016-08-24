@@ -9,7 +9,7 @@ module Sidekiq::Addons::Prioritize
     def zpop(queue)
       Sidekiq.redis do |con|
         #TODO: for some reason pipeline and multi didnt work; revisit
-        if ( self.script_sha.nil? ) or !con.script(:exists, self.script_sha)
+        if ( self.script_sha.nil? ) # or !con.script(:exists, self.script_sha) ignore this check; let it crash
           self.script_sha = con.script(:load, Sidekiq::Addons::Util::ZPOP)
         end
 
