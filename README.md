@@ -25,6 +25,14 @@ When jobs are enqueued in this order, this gems makes sure that, job3 is the one
 
 ## Usage
 
+Call `Sidekiq::Addons.configure()` from your stack initialize Sidekiq::Addons.  
+
+Use different redis:  
+  Sidekiq::Addons.configure({
+    url: 'redis://127.0.0.1/2',
+  })
+
+
 To always use default priority set ignore_priority => true at worker level
 ```ruby
 class IgnoreWorker
