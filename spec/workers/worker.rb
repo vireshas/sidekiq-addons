@@ -4,7 +4,7 @@ class MockWorker
   include Sidekiq::Worker
 
   def perform(*args)
-  	puts args
+    puts args
   end
 end
 
@@ -12,8 +12,8 @@ class IgnoreWorker
   include Sidekiq::Worker
   sidekiq_options :ignore_priority => true
 
-  def perform(name , args)
-  	puts args
+  def perform(*args)
+    puts args
   end
 end
 
@@ -22,7 +22,7 @@ class NonDefaultWorker
   sidekiq_options :queue => :non_default
 
   def perform(*args)
-  	puts args
+    puts args
   end
 end
 
@@ -31,7 +31,7 @@ class MinPriorityWorker
   sidekiq_options :min_priority => 50
 
   def perform(*args)
-  	puts args
+    puts args
   end
 end
 
@@ -42,6 +42,6 @@ class LazyEvalWorker
   }
 
   def perform(*args)
-  	puts args
+    puts args
   end
 end
