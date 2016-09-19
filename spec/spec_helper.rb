@@ -1,5 +1,4 @@
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
-$LOAD_PATH.unshift File.expand_path('workers', __FILE__)
 require 'coveralls'
 Coveralls.wear!
 
@@ -10,4 +9,4 @@ Sidekiq.options[:redis_url] = {
 
 require 'sidekiq/addons/util'
 require 'sidekiq/addons'
-require 'workers/worker'
+require 'workers'
