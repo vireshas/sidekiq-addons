@@ -20,6 +20,7 @@ module Sidekiq::Addons::Prioritize
     def retrieve_work
       priority_job = nil
       @queues.uniq.each do |q|
+        #TODO: use ignore list it redis
         q_name = Sidekiq::Addons::Util.priority_job_queue_name(q.split("queue:").last)
         priority_job = zpop(q_name)
         break if priority_job

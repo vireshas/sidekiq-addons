@@ -30,6 +30,8 @@ module Sidekiq::Addons::Prioritize
       if priority
         msg["queue"] = "queue:#{queue}"
         redis_pool.with {|con| self.class.enqueue_with_priority(con, queue, priority, msg) }
+        #TODO: add this middleware in the end
+        #TODO: return job id
         return false
       else
         yield
