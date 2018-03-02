@@ -78,7 +78,7 @@ Proc should either return a number or true to use priority scheduling
   * Minimal network transfer: loads a script in Redis and uses SHA to execute it. This greatly reduces network data transfer.
   * Can talk to remote Redis: From your stack, you can pass a REDIS_URL in Sidekiq.options and it can talk to that Redis.
   * When Sidekiq is interruppted, active jobs are re-enqueued with the existing priority. When Sidekiq boots-up, it will still pick the highest prortized job.
-  * Has automic ZPOP
+  * Has atomic ZPOP
 
 ## Coming up
   * Uniqueness: removes duplicate jobs
